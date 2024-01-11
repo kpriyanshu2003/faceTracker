@@ -18,17 +18,125 @@
       src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"
       crossorigin="anonymous"
     ></script>
-    <script src="./script.js" defer type="module"></script>
-    <link rel="stylesheet" href="./style.css" />
+    <script src="./script.js" defer></script>
+    <script src="./faceTrack.js" defer type="module"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
   </head>
 
-  <body>
-    <div id="circle">
-      <span class="circle"></span>
+  <body class="relative h-full w-full">
+    <div class="absolute" id="circle">
+      <span
+        class="circle absolute top-5 -left-5 border h-16 w-16 rounded-full"
+      ></span>
     </div>
-    <div class="container">
-      <video class="input_video"></video>
-      <canvas class="output_canvas" width="1280px" height="720px"></canvas>
+    <div>
+      <video
+        class="input_video object-cover m-4 rounded-lg"
+        width="711px"
+        height="400px"
+      ></video>
+      <canvas
+        class="output_canvas m-4 rounded-lg object-cover"
+        width="711px"
+        height="400px"
+      ></canvas>
+    </div>
+    <div class="absolute right-24 top-20 w-80" id="control">
+      <div class="my-2">
+        <h2>Video Width Slider</h2>
+        <div class="flex items-center gap-10">
+          <input
+            type="range"
+            min="800"
+            max="1920"
+            value="711"
+            id="widthSlider"
+            class="text-black"
+          />
+          <input
+            type="number"
+            min="100"
+            max="1920"
+            id="widthInput"
+            placeholder="711"
+            class="w-20 outline-none border p-2"
+          />
+        </div>
+        <h2>Video Height Slider</h2>
+        <div class="flex items-center gap-10">
+          <input
+            type="range"
+            min="100"
+            max="1920"
+            value="711"
+            id="heightSlider"
+            class="text-black"
+          />
+          <input
+            type="number"
+            id="heightInput"
+            placeholder="711"
+            min="100"
+            max="1920"
+            class="w-20 outline-none border p-2"
+          />
+        </div>
+      </div>
+      <div class="my-2">
+        <h2>Aspect Ratio Selector</h2>
+        <select id="aspectRatio" class="border p-2">
+          <option value="16/9" selected>16:9</option>
+          <option value="4/3">4:3</option>
+          <option value="1/1">1:1</option>
+          <option value="16/10">16:10</option>
+          <option value="21/9">21:9</option>
+          <option value="18/9">18:9</option>
+          <option value="3/2">3:2</option>
+          <option value="2.39/1">2.39:1</option>
+          <option value="2.35/1">2.35:1</option>
+        </select>
+      </div>
+      <br />
+      <h2>
+        <button
+          class="border py-1 px-2 bg-gray-200 rounded-md"
+          onclick="resetValue()"
+        >
+          RESET VIDEO
+        </button>
+      </h2>
+      <div class="flex items-center gap-2 mt-5">
+        <button
+          id="toggleCircle"
+          class="cursor-pointer border py-1 px-2 bg-gray-200 rounded-md"
+        >
+          Toggle Circle
+        </button>
+        <span id="circleText">Circle is visible</span>
+      </div>
+      <div class="flex items-center gap-2 mt-5">
+        <input
+          type="checkbox"
+          class="h-5 w-5 cursor-pointer"
+          id="hideControl"
+        /><label for="hideControl" class="cursor-pointer">Hide Controls</label>
+      </div>
+      <br /><br />
+      <span
+        >Note: To address technical issues, please ensure that the width is
+        adjusted before the height in the face mech video. This sequential
+        modification ensures synchronized dimension changes.
+      </span>
+    </div>
+    <div
+      class="fixed bottom-2 right-2 hidden items-center gap-2 mt-5"
+      id="showControlDiv"
+    >
+      <input
+        type="checkbox"
+        class="h-5 w-5 cursor-pointer"
+        id="showControl"
+      /><label for="hideControl" class="cursor-pointer">Show Controls</label>
     </div>
   </body>
 </html>
