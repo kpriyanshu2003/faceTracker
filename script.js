@@ -1,99 +1,96 @@
-const videoElement = document.getElementsByClassName("input_video")[0];
-const canvasElement = document.getElementsByClassName("output_canvas")[0];
-const canvasCtx = canvasElement.getContext("2d");
+const heightSlider = document.getElementById("heightSlider");
+const widthSlider = document.getElementById("widthSlider");
+const heightInput = document.getElementById("heightInput");
+const widthInput = document.getElementById("widthInput");
+const hideControl = document.getElementById("hideControl");
+const showControl = document.getElementById("showControl");
+const showControlDiv = document.getElementById("showControlDiv");
+const control = document.getElementById("control");
+const circle = document.getElementById("circle");
+const toggleCircle = document.getElementById("toggleCircle");
+const circleText = document.getElementById("circleText");
+const aspectRatio = document.getElementById("aspectRatio");
+const input_video = document.getElementsByClassName("input_video")[0];
+const output_canvas = document.getElementsByClassName("output_canvas")[0];
+function resetValue() {
+  input_video.style.height = "400px";
+  input_video.style.width = "711px";
+  output_canvas.style.height = "400px";
+  output_canvas.style.width = "711px";
+  heightSlider.value = 400;
+  widthSlider.value = 711;
+  heightInput.value = 400;
+  widthInput.value = 711;
+  aspectRatio.value = "16/9";
+}
 
-let irisPosition = { x: 0, y: 0 }; // sets default position
+function keepBounds() {
+  if (heightSlider.value > 711) heightSlider.value = 711;
+  if (widthSlider.value > 400) widthSlider.value = 400;
+  if (heightSlider.value < 100) heightSlider.value = 100;
+  if (widthSlider.value < 100) widthSlider.value = 100;
+}
 
-function updateIrisPosition(results) {
-  if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
-    // Assuming only one face is detected, taking the first face
-    const faceLandmarks = results.multiFaceLandmarks[0];
-    const irisLandmark = faceLandmarks[FACEMESH_FACE_OVAL[0][0]]; // Assuming the iris is the first point in the face oval
-    irisPosition = {
-      x: irisLandmark.x * canvasElement.width,
-      y: irisLandmark.y * canvasElement.height,
-    };
+heightSlider.addEventListener("input", () => {
+  input_video.style.height = `${heightSlider.value}px`;
+  output_canvas.style.height = `${heightSlider.value}px`;
+  heightInput.value = heightSlider.value;
+});
+
+widthSlider.addEventListener("input", () => {
+  input_video.style.width = `${widthSlider.value}px`;
+  output_canvas.style.width = `${widthSlider.value}px`;
+  widthInput.value = widthSlider.value;
+});
+
+heightInput.addEventListener("input", () => {
+  keepBounds();
+  input_video.style.height = `${heightInput.value}px`;
+  output_canvas.style.height = `${heightInput.value}px`;
+  heightSlider.value = heightInput.value;
+});
+
+widthInput.addEventListener("input", () => {
+  input_video.style.width = `${widthInput.value}px`;
+  output_canvas.style.width = `${widthInput.value}px`;
+  widthSlider.value = widthInput.value;
+});
+
+hideControl.addEventListener("click", () => {
+  if (hideControl.checked) {
+    control.style.display = "none";
+    showControlDiv.style.display = "flex";
+    showControl.checked = false;
+  } else {
+    control.style.display = "block";
+    showControlDiv.style.display = "none";
+    showControl.checked = true;
   }
-}
+});
 
-function onResults(results) {
-  canvasCtx.save();
-  canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-  canvasCtx.drawImage(
-    results.image,
-    0,
-    0,
-    canvasElement.width,
-    canvasElement.height
-  );
-  if (results.multiFaceLandmarks) {
-    for (const landmarks of results.multiFaceLandmarks) {
-      drawConnectors(canvasCtx, landmarks, FACEMESH_TESSELATION, {
-        color: "#C0C0C070",
-        lineWidth: 1,
-      });
-      drawConnectors(canvasCtx, landmarks, FACEMESH_RIGHT_EYE, {
-        color: "#FF3030",
-      });
-      drawConnectors(canvasCtx, landmarks, FACEMESH_RIGHT_EYEBROW, {
-        color: "#FF3030",
-      });
-      drawConnectors(canvasCtx, landmarks, FACEMESH_RIGHT_IRIS, {
-        color: "#FF3030",
-      });
-      drawConnectors(canvasCtx, landmarks, FACEMESH_LEFT_EYE, {
-        color: "#30FF30",
-      });
-      drawConnectors(canvasCtx, landmarks, FACEMESH_LEFT_EYEBROW, {
-        color: "#30FF30",
-      });
-      drawConnectors(canvasCtx, landmarks, FACEMESH_LEFT_IRIS, {
-        color: "#30FF30",
-      });
-      drawConnectors(canvasCtx, landmarks, FACEMESH_FACE_OVAL, {
-        color: "#E0E0E0",
-      });
-      drawConnectors(canvasCtx, landmarks, FACEMESH_LIPS, { color: "#E0E0E0" });
-      // Get dimensions of face
-      const faceOvalLandmarks = FACEMESH_FACE_OVAL.map(
-        (index) => landmarks[index]
-      );
-    }
-    updateIrisPosition(results);
+showControl.addEventListener("click", () => {
+  if (showControl.checked) {
+    control.style.display = "block";
+    hideControl.checked = false;
+    showControlDiv.style.display = "none";
+  } else {
+    control.style.display = "none";
+    hideControl.checked = true;
+    showControlDiv.style.display = "flex";
   }
-  canvasCtx.restore();
-}
-
-function controlObjectWithIrisPosition() {
-  const objectElement = document.getElementById("circle");
-  // const speed = 5; // Adjust as needed
-  objectElement.style.left =
-    irisPosition.x - objectElement.offsetWidth / 2 + "px";
-  objectElement.style.top =
-    irisPosition.y - objectElement.offsetHeight / 2 + "px";
-  requestAnimationFrame(controlObjectWithIrisPosition);
-}
-
-const faceMesh = new FaceMesh({
-  locateFile: (file) => {
-    return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
-  },
 });
-faceMesh.setOptions({
-  maxNumFaces: 2,
-  refineLandmarks: true,
-  minDetectionConfidence: 0.5,
-  minTrackingConfidence: 0.5,
-});
-faceMesh.onResults(onResults);
 
-const camera = new Camera(videoElement, {
-  onFrame: async () => {
-    await faceMesh.send({ image: videoElement });
-  },
-  width: 1280,
-  height: 720,
+toggleCircle.addEventListener("click", () => {
+  if (circle.style.display == "none") {
+    circle.style.display = "block";
+    circleText.innerText = "Circle is visible";
+  } else {
+    circle.style.display = "none";
+    circleText.innerHTML = "Circle is hidden";
+  }
 });
-camera.start();
 
-controlObjectWithIrisPosition(); //
+aspectRatio.addEventListener("click", () => {
+  input_video.style.aspectRatio = aspectRatio.value;
+  output_canvas.style.aspectRatio = aspectRatio.value;
+});
